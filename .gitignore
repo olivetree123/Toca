@@ -1,6 +1,7 @@
 # Binaries for programs and plugins
 *.pyc
 dist
+.idea
 __pycache__
 Toca.egg-info
 
