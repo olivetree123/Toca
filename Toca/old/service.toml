@@ -1,0 +1,60 @@
+# [ischool]   #服务名称
+# image = "ischool:latest"    # image 名称或 id
+# dockerfile = "/Users/gao/code/iSchool/Dockerfile"   # 如果没有指定 image，需要使用 Dockerfile 来 build
+# depends = ["redis", "mysql"]    # 依赖的服务名称，服务中心会去获取这些服务的 host 和 port，并自动生成变量 redis_host, redis_port
+# run = "docker run -it --rm --name=ischool -e REDIS_HOST={{redis_host}} -e REDIS_PORT={{redis_port}} ischool"
+
+# 服务中心可以配置一些基础服务，比如 mysql/redis/mq，这些服务会随着服务中心的启动而启动。
+# 程序启动时去服务中心获取所依赖服务的 host 和 port，启动成功以后向服务中心注册。
+# 服务中心会定期对所有服务做健康检查。
+
+[mysql] # 服务
+name = "mysql"  # 容器名称，服务名称
+port = 3308     # 服务端口
+host_ip = "10.1.7.9"   # 服务器 ip
+health_check = ""   # 健康检查，可以是 系统命令、shell 脚本、python 脚本。也可以是脚本的 url（url 需要以 http 开头）
+    [container]
+    image = "mysql:5.7"
+    # 容器名称默认为服务名称，也可以自定义
+    # network = "host"
+    ports = ["3308:3306"]
+    volumes = ["/data/mysql:/var/lib/mysql"]
+    env = ["MYSQL_ROOT_PASSWORD=123456"]
+
+
+
+[consul_agent]
+name = "consul"
+web_port = 8500
+# 环境准备，可以是 系统命令、shell 脚本、python 脚本。将适用于所有 host
+# 每个 host 都可以有自己的 ready 参数
+ready = ""
+# hosts 你必须在这里声明所有的服务器，未声明的服务器即便写了 [host] 也不做处理
+hosts = ["10.1.7.2", "10.1.7.6", "10.1.7.9"]
+    [container]
+    name = "consul"
+    image = "consul"
+    network = "host"
+    volumes = ["/etc/consul:/etc/consul", "/data/consul:/consul/data"]
+    command = "agent -config-file /etc/consul/consul.json"
+    [List:host]
+    # 如果一个服务没有设置 host，则默认为本机
+    # host 可以有自己的 container，如果没有，则使用上级对象的 container
+    ip = "10.1.7.2"   # 服务器 ip
+        [container]
+        inherit = "$.consul_agent.container"  # 继承其他对象，继承之后可以修改属性。$ 表示顶级对象
+        command = "agent -config-file /etc/consul/consul2.json"
+    [List:host]
+    ip = "10.1.7.6"   # 服务器 ip
+
+[ischool]
+name = "ischool"
+port = 5006
+depends = ["mysql", "redis"]    # 这些服务会优先启动
+    [container]
+    name = "ischool"
+    image = "ischool"
+    dockerfile = "/Users/gao/code/iSchool/Dockerfile"   # 如果 docker 未找到对应的 image，则会根据 dockerfile 直接 build
+    ports = ["5006:5006"]
+        
+    

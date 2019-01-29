@@ -1,0 +1,44 @@
+
+[env]
+class_id  = "123456"
+school_id = "123456"
+
+[liteApp]
+scheme = "http"
+port = 4001
+host = "class.h3c.com"
+    [Duration]
+        [GetDuration]
+        method = "get"
+        uri    = "/liteapp/duration"
+        [CreateDuration]
+        method = "post"
+        uri    = "/liteapp/duration"
+            [headers]
+            content-type = "application/json"
+            [params]
+                begin_time = "2019-01-01"
+                end_time   = "2019-06-01"
+                class_id   = "$.env.class_id"
+                school_id  = "$.env.school_id"
+        [ListDuration]
+        method = "get"
+        uri    = "/liteapp/duration/list"
+    
+    [Duty]
+        [CreateDuty]
+        method = "post"
+        uri = "/liteapp/duty"
+            [params]
+                duration_id = "$.liteApp.CreateDuration.response.uid"
+                duties      = "$._functions.loadJsonFromFile('duties.json')"
+        [GetDuty]
+        method = "get"
+        uri    = "/liteapp/duty/$.liteApp.CreateDuty.response.uid"
+    
+    [Section]
+        [ListSection]
+        method = "get"
+        uri    = "/liteapp/school/{{school_id}}/sections/"
+
+        

@@ -1,0 +1,58 @@
+
+# 保留关键字：name
+# env 将会被用作全乎变量，不会被定义为服务
+[env]
+school_uid = "72f6f36fe10c4c85adac33204f8843fe"
+class_id = ""
+album_id = "0a6b96de9c1a441c83f62820fccc1881"
+
+[ischool] # Service 对象
+# name = "我的大学"   # 项目别名，优先显示别名
+url = "https://class.h3c.com:8001"
+    [Album]  # Group 对象
+    # name = "聊天"   # 组别名，优先显示别名
+    uri = "/api/album"
+        # [POST:CreateChat]   # API 对象
+        # # name = "发送消息"
+        # method = "POST"
+        # # content-type = "application/json"
+        #     [headers]
+        #     Authorization = "Token 123456"
+        #     content-type = "application/json"
+        #     [params]
+        #     to = "123456"                   # 只支持 int/bool/string/list 三种类型，可以标注其他类型，但是传值时只会当 string 传递。
+        #     content = "Hello"
+        #     # file = "file::/Users/gao/123.txt"   # 默认类型为 string
+        # [GET:GetChat]  # API 名称
+        # # name = "获取聊天信息详情"   # API 别名，优先显示别名
+        # uri = "/api/chat/<chat_id>"
+        # version = 1.5                           # 没有引号，默认为数字
+        #     [params]
+        #     chat_id = "py::{{ischool}}.{{chat}}.{{CreateChat}}.Response['data']['id']"
+        #     # name = "gaojian"
+        [GET:GetAlbum]
+        uri = "/api/album"
+            [params]
+            album_id = "$.env.album_id"
+        [POST:CreateAlbum]
+        # TODO:存储返回值，其它接口可以引用该接口返回值中的变量
+        uri = "/api/album"
+            [headers]
+            content-type = "application/json"
+            [params]
+            name = "gaojian_album"
+            school_uid = "$.env.school_uid"
+        [GET:AlbumList]
+        uri = "/api/album/list?school_uid=<school_uid>"
+        version = 1.0
+            [params]
+            class_id = "$.env.class_id"
+            school_uid = "$.env.school_uid"
+    [Image]
+    uri = "/api/image"
+        [POST:UploadImage]
+            [params]
+            album_id = "0a6b96de9c1a441c83f62820fccc1881"
+            # file = "file::/Users/gao/Pictures/firewall.png"
+            file = "file::http://pj95rji5a.bkt.clouddn.com/Desert.jpg"
+
