@@ -1,13 +1,14 @@
 import re
 import os
 import toml
+import json
 from jinja2 import Template
 
 from toca.entity.api import Api
 from toca.entity.group import Group
 from toca.entity.service import Service
 from toca.utils.errors import HTTPMethodError
-from toca.utils.functions import loadJsonFromFile
+from toca.utils.functions import loadJsonFromFile, getRandomName, getRandomInt
 from toca.utils.parse import replace_dynamic_arg, get_dynamic_args
 
 
@@ -107,8 +108,8 @@ class Toca(object):
                         )
                     elif api.method.lower() in ("post", "put", "patch"):
                         r = req(
-                            data=api.params, 
-                            json=api.params, 
+                            data=api.params if not api.is_json() else None, 
+                            json=api.params if api.is_json() else None, 
                             headers=api.headers
                         )
                     elif api.method.lower() in ("head", "options", "delete"):
@@ -119,8 +120,14 @@ class Toca(object):
                         raise MethodError("Invalid request method: ", api.method)
                     if r.ok():
                         api.response = r.get_json() if api.is_json() else r.get_bytes()
+                    # else:
+                    #     print(r.status_code, r.content)
                     api.status_code = r.status_code
                     print(api.name, api.status_code)
+                    if api.is_json():
+                        print(json.dumps(api.response, indent=4, sort_keys=True))
+                    else:
+                        print(api.response)
 
     def ls(self, service_name=None):
         for service in self.service_list:

@@ -11,7 +11,7 @@ with open(path.join(here, "README.md"), encoding="utf-8") as f:
 
 setup(
     name = "Toca",
-    version = "0.1.3",
+    version = "0.1.4",
     author = "Gaojian",
     license = "MIT",
     packages = ["toca", "toca.entity", "toca.utils"],
