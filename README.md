@@ -18,7 +18,6 @@ optional arguments:
 
 ## 配置文件示例
 ```
-
 [env]
 class_id  = "123456"
 school_id = "123456"
@@ -67,7 +66,5 @@ host = "localhost"
         [liteApp.Section.ListSection]
         method = "get"
         uri    = "/liteapp/school/{{school_id}}/sections/"
-
-        
 
 ```
