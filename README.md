@@ -66,5 +66,10 @@ host = "localhost"
         [liteApp.Section.ListSection]
         method = "get"
         uri    = "/liteapp/school/{{school_id}}/sections/"
-
 ```
+
+## Todo
+1. 执行单个命令
+2. 执行单个命令时，可以在命令行中指定参数
+3. 执行单个 Group
+4. env 中的参数支持动态生成
