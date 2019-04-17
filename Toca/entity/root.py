@@ -8,7 +8,7 @@ from toca.entity.api import Api
 from toca.entity.group import Group
 from toca.entity.service import Service
 from toca.utils.errors import HTTPMethodError
-from toca.utils.functions import loadJsonFromFile, getRandomName, getRandomInt
+from toca.utils.functions import loadJsonFromFile, getRandomName, getRandomInt, fileObject, getNone
 from toca.utils.parse import replace_dynamic_arg, get_dynamic_args
 
 
@@ -24,10 +24,10 @@ class Toca(object):
         self.service_list.append(service)
     
     def get_dynamic_name(self, dynamic_name):
-        r = re.search("\{\$\s*([\w._\(\)\'\"]+)\s*\$\}", dynamic_name)
+        r = re.search("\{\$\s*([\w._ \-/\(\)\'\"]+)\s*\$\}", dynamic_name)
         if not r:
             return None
-        return r.groups()[0]
+        return r.groups()[0].strip()
     
     def get_dynamic_value(self, dynamic_name):
         dynamic_name = self.get_dynamic_name(dynamic_name)
@@ -82,20 +82,32 @@ class Toca(object):
                     api      = Api(api_name, method, uri)
                     group.add_api(api)
                     api.add_attr("params", api_dict.get("params", {}))
-                    api.add_attr("headers", api_dict.get("headers", service.headers))
+                    api.add_attr("files", api_dict.get("files", {}))
+                    api.add_attr("headers", api_dict.get("headers"))
+                    if not api.headers:
+                        api.headers = service.headers
+                    elif api.headers and service.headers:
+                        for key, value in service.headers.items():
+                            if key in api.headers:
+                                continue
+                            api.headers[key] = value
 
-    def run(self, service_name=None, api_name=None):
+    def run(self, service_name=None, api_list=None, show=False):
         for service in self.service_list:
             if service_name and service.name != service_name:
                 continue
             for group in service.group_list:
                 for api in group.api_list:
-                    if api_name and api.name != api_name:
+                    if api_list and api.name not in api_list:
                         continue
                     try:
                         uri = self.replace_dynamic_args(api.uri)
+                        for key, value in api.headers.items():
+                            api.headers[key] = self.replace_dynamic_args(api.headers[key])
                         for key, value in api.params.items():
                             api.params[key] = self.replace_dynamic_args(api.params[key])
+                        for key, value in api.files.items():
+                            api.files[key] = self.replace_dynamic_args(value)
                     except AttributeError as e:
                         print(api.name, "ERROR = ", e)
                         continue
@@ -110,6 +122,7 @@ class Toca(object):
                         r = req(
                             data=api.params if not api.is_json() else None, 
                             json=api.params if api.is_json() else None, 
+                            files=api.files if api.files else None,
                             headers=api.headers
                         )
                     elif api.method.lower() in ("head", "options", "delete"):
@@ -124,10 +137,11 @@ class Toca(object):
                     #     print(r.status_code, r.content)
                     api.status_code = r.status_code
                     print(api.name, api.status_code)
-                    if api.is_json():
-                        print(json.dumps(api.response, indent=4, sort_keys=True))
-                    else:
-                        print(api.response)
+                    if show:
+                        if api.is_json():
+                            print(json.dumps(api.response, indent=4, sort_keys=True))
+                        else:
+                            print(api.response)
 
     def ls(self, service_name=None):
         for service in self.service_list:

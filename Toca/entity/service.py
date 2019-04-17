@@ -11,7 +11,7 @@ class Service(object):
         self.scheme = scheme
         self.headers = headers
         self.group_list:List[Group] = []
-        self.winney = Winney(host=self.host, port=self.port, headers=self.headers)
+        self.winney = Winney(host=self.host, port=self.port, headers=self.headers, protocol=scheme)
     
     def is_json(self):
         if not self.headers:

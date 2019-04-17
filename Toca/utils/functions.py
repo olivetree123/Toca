@@ -18,3 +18,9 @@ def getRandomName(prefix="", suffix="", length=6):
 
 def getRandomInt(min_int=0, max_int=100):
     return random.randint(min_int, max_int)
+
+def fileObject(filePath):
+    return open(filePath, "rb")
+
+def getNone():
+    return None

@@ -13,12 +13,12 @@ class Api(object):
         if not self.headers:
             return False
         for key, value in self.headers.items():
-            if key.lower() == "content-type" and value.lower() == "application/json":
+            if key.lower() == "content-type" and value and value.lower() == "application/json":
                 return True
         return False
     
     def check_name(self, name):
-        if name.lower() in ("method", "content-type", "headers", "params", "uri", "version"):
+        if name.lower() in ("method", "content-type", "headers", "params", "uri", "version", "files"):
             return True
         return False
 

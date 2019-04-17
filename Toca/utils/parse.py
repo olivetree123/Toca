@@ -3,7 +3,7 @@ import re
 
 def get_dynamic_args(value):
     # 获取动态参数 {$ liteApp.Duration.CreateDuration.response.uid $}
-    res = re.search("(\{\$[\w._ \(\)\'\"]+\$\})", value)
+    res = re.search("(\{\$[\w._ \-/\(\)\'\"]+\$\})", value)
     if not res:
         return []
     result = [r.strip() for r in res.groups()]
